@@ -169,7 +169,3 @@ head(post)
 ## License
 
 GPL-3 (see the `License:` field in `DESCRIPTION`).
-
-```
-::contentReference[oaicite:0]{index=0}
-```
