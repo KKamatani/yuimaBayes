@@ -1,6 +1,13 @@
 .Rproj.user
 .Rhistory
-.Rdata
-.httr-oauth
+.RData
+.Ruserdata
+.Rbuildignore
+.Rcheck/
 .DS_Store
-.quarto
+.vscode/
+packrat/
+renv/library/
+inst/doc/
+*.tar.gz
+*.Rcheck/

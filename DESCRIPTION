@@ -1,11 +1,25 @@
 Package: yuimaBayes
-Title: What the Package Does (One Line, Title Case)
+Title: Bayesian Inference for 'yuima' Stochastic Differential Equation Models
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("First", "Last", 
+           email = "first.last@example.com", 
+           role = c("aut", "cre"))
+Description: Provides adaptive Bayesian estimation for stochastic 
+    differential equation models built with the 'yuima' package. 
+    Model specifications in a 'yuima' object are automatically translated 
+    into 'Stan' code for posterior inference via the 'rstan' interface. 
+    Supports multivariate models, per-parameter Stan constraints, and 
+    retention of symbolic parameter names in the posterior output.
+License: GPL-3
+Imports:
+    yuima,
+    methods,
+    zoo,
+    rstan
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
