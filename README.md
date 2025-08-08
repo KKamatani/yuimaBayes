@@ -1,0 +1,176 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# yuimaBayes
+
+<!-- badges: start -->
+
+<!-- Enable when ready:
+[![R-CMD-check](https://github.com/KKamatani/yuimaBayes/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/KKamatani/yuimaBayes/actions/workflows/R-CMD-check.yaml)
+-->
+
+<!-- badges: end -->
+
+**Adaptive Bayesian estimation for `yuima` SDE models via Stan.**
+`yuimaBayes` generates Stan code *on the fly* from the drift and
+diffusion of a `yuima` model and runs posterior inference through
+`rstan`. Each model parameter is declared individually in Stan so
+posterior draws keep their symbolic names.
+
+## Overview
+
+- Parses `object@model` (drift & diffusion) and builds a **Gaussian
+  Euler one–step transition**.
+
+- **Auto-generates a Stan program** with one (by default
+  **unconstrained**) parameter per model symbol.
+
+- Optional **Stan bounds** via `bounds = list(par = c(lower, upper))`.
+
+- Optional **priors** via `priors = list(par = "normal(0,1)")` with a
+  `default_prior`.
+
+- Returns an S4 object `"bayes.yuima"` with slots:
+
+  - `fit`: `rstan::sampling()` result
+  - `call`: original call
+  - `yuima`: the input `yuima` object
+
+## Installation
+
+Install the development version from GitHub:
+
+``` r
+# install.packages("pak")
+pak::pak("KKamatani/yuimaBayes")
+```
+
+You will also need:
+
+``` r
+pak::pak(c("yuima", "rstan", "zoo"))
+```
+
+## Quick example (OU process)
+
+Stan compilation can take a while; this example is not evaluated during
+README builds.
+
+``` r
+library(yuima)
+library(yuimaBayes)
+
+## 1D OU model
+mod <- setModel(
+  drift          = "theta * (mu - x)",
+  diffusion      = "sigma",
+  time.variable  = "t",
+  state.variable = "x",
+  solve.variable = "x"
+)
+
+set.seed(1)
+samp <- setSampling(Initial = 0, n = 200, delta = 0.01)
+yui  <- setYuima(model = mod, sampling = samp)
+sim  <- simulate(yui, xinit = 0,
+                 true.parameter = list(theta = 1, mu = 0, sigma = 0.3))
+
+# Weakly-informative priors; slightly higher adapt_delta for stability
+fit <- bayes(
+  sim,
+  bounds        = list(sigma = c(0, Inf)),
+  priors        = list(sigma = "student_t(3, 0, 0.5)"),
+  default_prior = "student_t(3, 0, 2.5)",
+  chains        = 2,
+  iter          = 800,
+  control       = list(adapt_delta = 0.95)
+)
+
+print(fit@fit)
+```
+
+## Usage
+
+### Function signature
+
+``` r
+bayes(
+  object,                # yuima object with model + data
+  chains         = 4,    # forwarded to rstan::sampling()
+  iter           = 2000, # per-chain iterations
+  bounds         = list(),
+  priors         = list(),
+  default_prior  = "normal(0, 5)",
+  ...                    # passed to rstan::sampling()
+)
+```
+
+### Parameter bounds
+
+Provide `bounds` as a **named list** mapping parameter names to
+`(lower, upper)`:
+
+``` r
+bounds = list(
+  sigma = c(0, Inf),   # real<lower=0>
+  rho   = c(-1, 1)     # real<lower=-1, upper=1>
+)
+```
+
+Use `Inf`, `-Inf`, or `NULL` for “no bound” on a side. Bounds are
+translated into Stan constraints (e.g., `real<lower=0>`).
+
+### Priors
+
+Provide `priors` as a named list mapping parameter names to a **Stan
+distribution string** (no semicolon). Unlisted parameters receive
+`default_prior`.
+
+``` r
+priors = list(
+  sigma = "student_t(3, 0, 0.5)",
+  theta = "normal(0, 3)",
+  mu    = "normal(0, 3)"
+)
+default_prior = "student_t(3, 0, 2.5)"
+```
+
+To suppress a prior for a specific parameter, set it to `NULL` or
+`FALSE`. To run **likelihood-dominant** inference (no priors), set
+`default_prior = NULL` (you may need higher `adapt_delta` / more
+iterations).
+
+### Output
+
+The return value is an S4 object `"bayes.yuima"` with:
+
+- `fit` — the Stan fit from `rstan::sampling()`
+- `call` — original call
+- `yuima` — the input `yuima` object
+
+Typical post-processing:
+
+``` r
+print(fit@fit)
+post <- as.data.frame(fit@fit)
+head(post)
+```
+
+## Notes
+
+- Input data and time index must not contain `NA`.
+- The Euler one–step transition uses the model’s drift/diffusion as
+  text; state variables are substituted internally.
+- For CI/README, keep Stan-compiling chunks `eval=FALSE` for speed.
+- Rebuild this README via `devtools::build_readme()` or a GitHub Action.
+
+## See also
+
+- `yuima::setModel()`, `yuima::setYuima()`, `yuima::simulate()`
+- `rstan::sampling()`, `rstan::stan_model()`
+
+## License
+
+GPL-3 (see the `License:` field in `DESCRIPTION`).
+
+    ::contentReference[oaicite:0]{index=0}
