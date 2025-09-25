@@ -11,3 +11,20 @@ renv/library/
 inst/doc/
 *.tar.gz
 *.Rcheck/
+
+# R / OS cruft
+.Rproj.user/
+.Rhistory
+.RData
+.DS_Store
+.Renviron
+
+# pkg site/build
+_pkgdown.yml
+pkgdown/
+docs/
+_site/
+
+# Stan build
+*.rds
+*.stan.tmp
