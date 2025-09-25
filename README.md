@@ -38,23 +38,30 @@ posterior draws keep their symbolic names.
 
 ## Installation
 
-Install the development version from GitHub:
+You need a C++14 toolchain for **rstan** (to compile Stan models at
+runtime).
+
+- **Windows:** Rtools (R 4.4 → Rtools 4.4; R 4.2–4.3 → Rtools42)
+- **macOS:** Xcode Command Line Tools (`xcode-select --install`)
+- **Linux:** g++, make (e.g. `build-essential`)
+
+Then install from GitHub:
 
 ``` r
 # install.packages("pak")
 pak::pak("KKamatani/yuimaBayes")
 ```
 
-You will also need:
+or via `remotes`:
 
 ``` r
-pak::pak(c("yuima", "rstan", "zoo"))
+# install.packages("remotes")
+remotes::install_github("KKamatani/yuimaBayes", dependencies = TRUE)
 ```
 
 ## Quick example (OU process)
 
-Stan compilation can take a while; this example is not evaluated during
-README builds.
+Stan compilation can take a while; the example below is not evaluated.
 
 ``` r
 library(yuima)
@@ -161,8 +168,6 @@ head(post)
 - Input data and time index must not contain `NA`.
 - The Euler one–step transition uses the model’s drift/diffusion as
   text; state variables are substituted internally.
-- For CI/README, keep Stan-compiling chunks `eval=FALSE` for speed.
-- Rebuild this README via `devtools::build_readme()` or a GitHub Action.
 
 ## See also
 
